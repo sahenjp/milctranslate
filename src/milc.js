@@ -266,7 +266,8 @@ function protectUrls(input) {
 const EXPAND_WORDS = [
   [/\bCyber_JB\b/g, 'サイバー系ジェイルブレイク'], [/\bEro_JB\b/g, '性的コンテンツ系ジェイルブレイク'],
   [/\bfrontier_model\b/g, 'フロンティアモデル'], [/\bopen_model\b/g, 'オープンモデル'],
-  [/\bdef_pressure\b/g, '防御圧力'], [/\bcorp_safety\b/g, '企業の安全対策'],
+  [/\bfrontier\b/g, 'フロンティアモデル'], [/\bopen\b/g, 'オープンモデル'],
+  [/\bpressure_def\b/g, '防御圧力'], [/\bdef_pressure\b/g, '防御圧力'], [/\bcorp_safety\b/g, '企業の安全対策'],
   [/\bsec_audit\b/g, 'セキュリティ監査'], [/\bsimple_task\b/g, '単純なタスク'],
   [/\btechLegit\b/g, '技術的に正当な形'], [/\bseqExec\b/g, '逐次実行'],
   [/\bJB\b/g, 'ジェイルブレイク'], [/\bRP\b/g, 'ロールプレイ'], [/\bscn\b/g, 'シナリオ'],
@@ -277,7 +278,7 @@ const EXPAND_WORDS = [
   [/\bpaper\b/g, '論文'], [/\bM\b/g, 'モデル'], [/\bparts\b/g, '部品化'], [/\bsplit\b/g, '分割'],
   [/\bdiscover\b/g, '発見'], [/\bexec\b/g, '実行'], [/\binfer\b/g, '推論'],
   [/\brecoverable\b/g, '復元可能'], [/\bamb\b/g, '曖昧'], [/\bq\b/g, '質問'],
-  [/\bposs\b|\bpossible\b/g, '可能'], [/\buseful\b/g, '有用'], [/\bweak\b/g, '弱い'],
+  [/\bposs\b|\bpossible\b/g, '可能'], [/\buseful\b/g, '有用'], [/\bweaker\b/g, 'より弱い'], [/\bweak\b/g, '弱い'],
   [/\bstrong\b/g, '強い'], [/\bhard\b/g, '難しい'], [/\beasy\b/g, '容易'], [/\bhigh\b/g, '高い'],
   [/\blow\b/g, '低い'], [/\bfuture\b/g, '将来'], [/\bnext_year\b/g, '来年'], [/\brapid\b/g, '急速'],
   [/\brevive\b/g, '復活'], [/\bdiscuss\b/g, '議論'], [/\bout\b|\boutput\b/g, '出力'],
@@ -285,13 +286,16 @@ const EXPAND_WORDS = [
   [/\bself_knowledge\b/g, '自己知識'], [/\bwhich_direction\b|\bdir\b|\bdirection\b/g, '方向'],
   [/\bactive\b/g, '活発'], [/\breceived\b/g, '受け取った'], [/\bdialects\b/g, '方言'],
   [/\bhyp\b/g, '仮説'], [/\bprs\b|\bpressure\b/g, '圧力'], [/\bdef\b/g, '定義'],
-  [/\bcstr\b|\bconstraint\b/g, '制約'], [/\buncens\b/g, '無検閲'], [/\bmay\b/g, '可能性がある'],
+  [/\bcstr\b|\bconstraint\b/g, '制約'], [/\buncens\b/g, '無検閲'],
+  [/\blikely\b/g, '可能性が高い'], [/\byes\b/g, 'あり'], [/\bmay\b/g, '可能性がある'],
+  [/\bmin_bytes\b/g, '最小バイト'], [/\bmultibyte\b/g, 'マルチバイト'],
+  [/\baim\b/g, '目的'], [/\bstyle\b/g, 'スタイル'], [/\bodd\b/g, '特異'],
 ];
 
 function expandAliases(text) {
   const aliases = new Map();
   let body = text;
-  body = body.replace(/(?:^|;)\\s*([A-Z]):=([A-Za-z][A-Za-z0-9_]*)(?=\\s*;|$)/g, (full, alias, value) => {
+  body = body.replace(/(?:^|;)\s*([A-Z]):=([A-Za-z][A-Za-z0-9_]*)(?=\s*;|$)/g, (full, alias, value) => {
     aliases.set(alias, value);
     return '';
   });
@@ -305,7 +309,7 @@ export function expand(input) {
   const original = String(input ?? '').trim();
   if (!original) return '';
   const { text: protectedText, values } = protectUrls(original);
-  let out = expandAliases(protectedText.replace(/^\\s*MiL\\s*;?/i, ''));
+  let out = expandAliases(protectedText.replace(/^\s*MiL\s*;?/i, ''));
 
   out = out
     .replace(/!=>|⇏/g, ' 必ずしも意味しない ')
@@ -321,12 +325,14 @@ export function expand(input) {
     .replace(/↓/g, ' 低下 ')
     .replace(/←/g, ' は次の要因から影響 ')
     .replace(/Δ|\bd\b/g, ' 変化 ')
+    .replace(/as@recent_paper/g, ' 最近の論文のように ')
+    .replace(/\bBUT\b/gi, ' しかし ')
     .replace(/(?<=[A-Za-z0-9_)\]])\+(?=[A-Za-z0-9_(\[])/g, ' かつ ');
 
   // ASCII + / - are ambiguous, so only expand when attached to known compact terms.
   out = out
     .replace(/\b(may|rob|safe|perf|active|pressure|prs|def)\+/g, '$1 増加')
-    .replace(/\b(may|rob|safe|perf|active|pressure|prs|def)-/g, '$1 低下');
+    .replace(/\b(may|rob|safe|perf|active|pressure|prs|def|multibyte)-/g, '$1 低下');
 
   for (const [pattern, replacement] of EXPAND_WORDS) out = out.replace(pattern, replacement);
   out = out
