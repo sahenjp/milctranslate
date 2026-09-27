@@ -51,8 +51,9 @@ const COMMON = [
   [/曖昧(?:な|さ)?/giu, 'amb'],
   [/質問(?:する|した|して)?/giu, 'q'],
   [/方向/giu, 'direction'],
-  [/バイト/giu, 'bytes'],
+  [/最小(?:の)?バイト/giu, 'min_bytes'],
   [/マルチバイト/giu, 'multibyte'],
+  [/バイト/giu, 'bytes'],
   [/最小(?:化|にする)?/giu, 'min'],
   [/圧縮(?:する|した|して)?/giu, 'compress'],
   [/違い|差分?|変化/giu, 'delta'],
@@ -290,7 +291,7 @@ const EXPAND_WORDS = [
 function expandAliases(text) {
   const aliases = new Map();
   let body = text;
-  body = body.replace(/(?:^|;)([A-Z]):=([A-Za-z][A-Za-z0-9_]*)(?=;|$)/g, (full, alias, value) => {
+  body = body.replace(/(?:^|;)\\s*([A-Z]):=([A-Za-z][A-Za-z0-9_]*)(?=\\s*;|$)/g, (full, alias, value) => {
     aliases.set(alias, value);
     return '';
   });
@@ -304,7 +305,7 @@ export function expand(input) {
   const original = String(input ?? '').trim();
   if (!original) return '';
   const { text: protectedText, values } = protectUrls(original);
-  let out = expandAliases(protectedText);
+  let out = expandAliases(protectedText.replace(/^\\s*MiL\\s*;?/i, ''));
 
   out = out
     .replace(/!=>|⇏/g, ' 必ずしも意味しない ')
