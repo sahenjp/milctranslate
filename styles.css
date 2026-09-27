@@ -1,0 +1,59 @@
+:root {
+  color-scheme: light dark;
+  --bg: #f4f4f1;
+  --panel: #fff;
+  --text: #181817;
+  --muted: #77776f;
+  --line: #d9d9d3;
+  --soft: #ecece7;
+  --button: #181817;
+  --button-text: #fff;
+  font-family: Inter, "Noto Sans JP", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #11110f;
+    --panel: #191917;
+    --text: #f2f2ee;
+    --muted: #9a9a91;
+    --line: #34342f;
+    --soft: #232320;
+    --button: #f2f2ee;
+    --button-text: #161614;
+  }
+}
+* { box-sizing: border-box; }
+body { margin: 0; min-height: 100vh; background: var(--bg); color: var(--text); }
+button, select, textarea { font: inherit; }
+button, select { color: inherit; }
+.app { width: min(1080px, calc(100% - 28px)); margin: 0 auto; padding: 36px 0 56px; }
+.top { display: flex; align-items: end; justify-content: space-between; gap: 18px; margin-bottom: 20px; }
+h1 { margin: 0; font-size: clamp(28px, 4vw, 42px); letter-spacing: -.045em; line-height: 1; }
+.lead { margin: 8px 0 0; color: var(--muted); font-size: 14px; }
+.controls { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.segment { display: flex; gap: 3px; padding: 3px; border: 1px solid var(--line); border-radius: 11px; background: var(--panel); }
+.segment button { border: 0; border-radius: 8px; padding: 8px 11px; background: transparent; color: var(--muted); cursor: pointer; }
+.segment button[aria-pressed="true"] { background: var(--button); color: var(--button-text); }
+select, .small-button { border: 1px solid var(--line); background: var(--panel); border-radius: 10px; padding: 8px 10px; }
+.small-button { cursor: pointer; }
+.editors { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.pane { min-width: 0; border: 1px solid var(--line); border-radius: 14px; overflow: hidden; background: var(--panel); }
+.pane-head { display: flex; align-items: center; justify-content: space-between; height: 44px; padding: 0 13px; border-bottom: 1px solid var(--line); font-size: 13px; font-weight: 650; }
+.meta { color: var(--muted); font-size: 11px; font-weight: 450; }
+textarea { display: block; width: 100%; min-height: 390px; border: 0; outline: 0; resize: vertical; padding: 16px; background: transparent; color: var(--text); font: 15px/1.75 ui-monospace, SFMono-Regular, Menlo, Consolas, "Noto Sans Mono CJK JP", monospace; }
+textarea::placeholder { color: var(--muted); }
+.bottom { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+.bottom button { border: 1px solid var(--line); border-radius: 10px; padding: 9px 12px; background: var(--panel); cursor: pointer; }
+.bottom .primary { border-color: var(--button); background: var(--button); color: var(--button-text); }
+.saved { margin-left: auto; color: var(--muted); font-size: 12px; }
+.saved strong { color: var(--text); font-size: 14px; }
+.hint { width: 100%; margin: 4px 0 0; color: var(--muted); font-size: 11px; }
+.toast { position: fixed; left: 50%; bottom: 22px; transform: translate(-50%, 8px); opacity: 0; pointer-events: none; padding: 8px 12px; border-radius: 999px; background: var(--text); color: var(--bg); font-size: 12px; transition: .16s ease; }
+.toast[data-show="true"] { opacity: 1; transform: translate(-50%, 0); }
+@media (max-width: 760px) {
+  .app { width: min(100% - 18px, 1080px); padding-top: 24px; }
+  .top { align-items: stretch; flex-direction: column; }
+  .editors { grid-template-columns: 1fr; }
+  textarea { min-height: 240px; }
+  .saved { margin-left: 0; width: 100%; }
+}
