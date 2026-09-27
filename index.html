@@ -3,471 +3,53 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="description" content="自然文とMiL;Cをシンプルに相互変換する試作ツール">
+  <meta name="theme-color" content="#181817">
+  <meta name="description" content="自然文とMiL;Cを相互変換する軽量なWebアプリ">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" href="./icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./styles.css">
   <title>MiL;C Translate</title>
-  <style>
-    :root {
-      color-scheme: light dark;
-      --bg: #f5f5f3;
-      --panel: #ffffff;
-      --text: #171717;
-      --muted: #777773;
-      --line: #deded9;
-      --soft: #efefec;
-      --accent: #171717;
-      --accentText: #ffffff;
-      font-family: Inter, "Noto Sans JP", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    }
-    @media (prefers-color-scheme: dark) {
-      :root {
-        --bg: #111110;
-        --panel: #181817;
-        --text: #f2f2ef;
-        --muted: #9c9c96;
-        --line: #333330;
-        --soft: #222220;
-        --accent: #f2f2ef;
-        --accentText: #171717;
-      }
-    }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      min-height: 100vh;
-      background: var(--bg);
-      color: var(--text);
-    }
-    main {
-      width: min(1080px, calc(100% - 32px));
-      margin: 0 auto;
-      padding: 48px 0 64px;
-    }
-    header {
-      display: flex;
-      align-items: flex-end;
-      justify-content: space-between;
-      gap: 20px;
-      margin-bottom: 28px;
-    }
-    h1 {
-      margin: 0;
-      font-size: clamp(28px, 4vw, 46px);
-      letter-spacing: -0.04em;
-      line-height: 1;
-    }
-    .sub {
-      margin: 8px 0 0;
-      color: var(--muted);
-      font-size: 14px;
-    }
-    .switch {
-      display: inline-flex;
-      gap: 4px;
-      padding: 4px;
-      border: 1px solid var(--line);
-      border-radius: 12px;
-      background: var(--panel);
-    }
-    button {
-      border: 0;
-      font: inherit;
-      cursor: pointer;
-      color: inherit;
-    }
-    .switch button {
-      padding: 9px 13px;
-      border-radius: 9px;
-      background: transparent;
-      color: var(--muted);
-    }
-    .switch button[aria-pressed="true"] {
-      background: var(--accent);
-      color: var(--accentText);
-    }
-    .editors {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-    }
-    .pane {
-      min-width: 0;
-      border: 1px solid var(--line);
-      border-radius: 16px;
-      overflow: hidden;
-      background: var(--panel);
-    }
-    .pane-head {
-      height: 48px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      padding: 0 14px;
-      border-bottom: 1px solid var(--line);
-      font-size: 14px;
-      font-weight: 650;
-    }
-    .count {
-      color: var(--muted);
-      font-size: 12px;
-      font-weight: 450;
-    }
-    textarea {
-      display: block;
-      width: 100%;
-      min-height: 420px;
-      resize: vertical;
-      border: 0;
-      outline: 0;
-      padding: 18px;
-      background: transparent;
-      color: var(--text);
-      font: 16px/1.8 ui-monospace, SFMono-Regular, Menlo, Consolas, "Noto Sans Mono CJK JP", monospace;
-    }
-    textarea::placeholder { color: var(--muted); }
-    .actions {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex-wrap: wrap;
-      margin-top: 12px;
-    }
-    .actions button {
-      padding: 10px 14px;
-      border: 1px solid var(--line);
-      border-radius: 10px;
-      background: var(--panel);
-    }
-    .actions .primary {
-      background: var(--accent);
-      color: var(--accentText);
-      border-color: var(--accent);
-    }
-    .note {
-      margin-left: auto;
-      color: var(--muted);
-      font-size: 12px;
-    }
-    .toast {
-      position: fixed;
-      left: 50%;
-      bottom: 24px;
-      transform: translateX(-50%) translateY(12px);
-      opacity: 0;
-      pointer-events: none;
-      padding: 9px 12px;
-      border-radius: 999px;
-      background: var(--text);
-      color: var(--bg);
-      font-size: 13px;
-      transition: .18s ease;
-    }
-    .toast.show {
-      opacity: 1;
-      transform: translateX(-50%) translateY(0);
-    }
-    @media (max-width: 760px) {
-      main { width: min(100% - 20px, 1080px); padding-top: 28px; }
-      header { align-items: stretch; flex-direction: column; }
-      .switch { align-self: flex-start; }
-      .editors { grid-template-columns: 1fr; }
-      textarea { min-height: 260px; }
-      .note { width: 100%; margin-left: 0; }
-    }
-  </style>
 </head>
 <body>
-  <main>
-    <header>
+  <main class="app">
+    <header class="top">
       <div>
         <h1>MiL;C Translate</h1>
-        <p class="sub">自然文とMiL;Cを、できるだけ小さく行き来する。</p>
+        <p class="lead">自然文 ⇄ MiL;C。入力したそばから変換。</p>
       </div>
-      <div class="switch" role="group" aria-label="変換方向">
-        <button id="toMilcBtn" aria-pressed="true">自然文 → MiL;C</button>
-        <button id="fromMilcBtn" aria-pressed="false">MiL;C → 自然文</button>
+      <div class="controls">
+        <div class="segment" role="group" aria-label="変換方向">
+          <button id="toMilc" aria-pressed="true">→ MiL;C</button>
+          <button id="toJa" aria-pressed="false">→ 日本語</button>
+        </div>
+        <select id="objective" aria-label="圧縮基準">
+          <option value="tokens">トークン寄り</option>
+          <option value="bytes">最小バイト寄り</option>
+        </select>
+        <button id="install" class="small-button" hidden>インストール</button>
       </div>
     </header>
 
     <section class="editors">
       <div class="pane">
-        <div class="pane-head">
-          <span id="inputLabel">自然文</span>
-          <span class="count" id="inputCount">0文字</span>
-        </div>
-        <textarea id="input" spellcheck="false" placeholder="ここに文章を貼り付ける"></textarea>
+        <div class="pane-head"><span id="inputLabel">自然文</span><span id="inputMeta" class="meta">0字 / 0B</span></div>
+        <textarea id="input" spellcheck="false" autocomplete="off" placeholder="文章を貼り付ける"></textarea>
       </div>
-
       <div class="pane">
-        <div class="pane-head">
-          <span id="outputLabel">MiL;C</span>
-          <span class="count" id="outputCount">0文字</span>
-        </div>
+        <div class="pane-head"><span id="outputLabel">MiL;C</span><span id="outputMeta" class="meta">0字 / 0B</span></div>
         <textarea id="output" spellcheck="false" readonly placeholder="変換結果"></textarea>
       </div>
     </section>
 
-    <div class="actions">
-      <button class="primary" id="copyBtn">結果をコピー</button>
-      <button id="shareBtn">リンクをコピー</button>
-      <button id="clearBtn">クリア</button>
-      <span class="note">試作版。曖昧な意味の補完はせず、未知の文は raw(...) として残します。</span>
+    <div class="bottom">
+      <button id="copy" class="primary">コピー</button>
+      <button id="share">共有リンク</button>
+      <button id="clear">クリア</button>
+      <span class="saved">バイト削減 <strong id="savedMeta">—</strong></span>
+      <p class="hint">MiL;Cは固定文法ではないため、このアプリは記号・略語・aliasを使う実用的な方言として変換します。未知語は消さずに残します。</p>
     </div>
   </main>
-
-  <div class="toast" id="toast" role="status" aria-live="polite"></div>
-
-  <script>
-    (function () {
-      var input = document.getElementById("input");
-      var output = document.getElementById("output");
-      var inputLabel = document.getElementById("inputLabel");
-      var outputLabel = document.getElementById("outputLabel");
-      var inputCount = document.getElementById("inputCount");
-      var outputCount = document.getElementById("outputCount");
-      var toMilcBtn = document.getElementById("toMilcBtn");
-      var fromMilcBtn = document.getElementById("fromMilcBtn");
-      var copyBtn = document.getElementById("copyBtn");
-      var shareBtn = document.getElementById("shareBtn");
-      var clearBtn = document.getElementById("clearBtn");
-      var toast = document.getElementById("toast");
-      var direction = "to";
-      var timer;
-
-      function esc(value) {
-        return value.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
-      }
-
-      function clean(value) {
-        return value.replace(/\r/g, "").replace(/[ \t]+/g, " ").trim();
-      }
-
-      function splitSentences(value) {
-        return clean(value)
-          .split(/(?<=[。！？!?])|\n+/)
-          .map(function (s) { return s.replace(/[。！？!?]+$/g, "").trim(); })
-          .filter(Boolean);
-      }
-
-      function toMilc(value) {
-        var src = clean(value);
-        if (!src) return "";
-
-        var out = [];
-        var used = new Set();
-
-        function emit(key, text) {
-          if (!used.has(key)) {
-            used.add(key);
-            out.push(text);
-          }
-        }
-
-        if (/(Python|パイソン).*(コード|実装)|(コード|実装).*(Python|パイソン)/i.test(src) && /(調査|調べ|確認|解析|レビュー)/.test(src)) {
-          emit("inspect-py", "inspect(py.code)");
-        } else if (/(コード|実装).*(調査|調べ|確認|解析|レビュー)|(調査|調べ|確認|解析|レビュー).*(コード|実装)/.test(src)) {
-          emit("inspect-code", "inspect(code)");
-        } else if (/(調査|調べ|確認|解析|レビュー)/.test(src)) {
-          emit("inspect", "inspect(target)");
-        }
-
-        if (/(パフォーマンス|性能|速度).*(問題|課題|ボトルネック)|(問題|課題|ボトルネック).*(パフォーマンス|性能|速度)/.test(src)) {
-          emit("perf", "find(perf.issue)");
-        }
-
-        if (/(原因|根本原因)/.test(src)) emit("cause", "find(cause)");
-        if (/(修正|直し|改善)/.test(src)) emit("fix", "fix");
-        if (/(動作|挙動|仕様).*(変えず|変えない|維持|保持)/.test(src)) emit("behavior", "constraint:=behavior≡");
-
-        if (/(修正後|変更後|改善後)/.test(src) && /(ベンチマーク|benchmark|計測)/i.test(src)) {
-          emit("bench-after", "fix→bench");
-        } else if (/(ベンチマーク|benchmark|計測)/i.test(src)) {
-          emit("bench", "bench");
-        }
-
-        if (/(数値|定量|定量化)/.test(src)) emit("quant", "metric:=quantify");
-
-        if (/(問題点|問題).*(原因).*(改善策|修正).*(ベンチマーク|結果)|(原因).*(改善策|修正).*(結果)/.test(src)) {
-          emit("summary", "summary{problem,cause,solution,bench}→concise");
-        } else if (/(簡潔|短く|要約|まとめ)/.test(src)) {
-          emit("summary-short", "summary→concise");
-        }
-
-        if (/(元の|原文|raw).*(コード|データ).*(保持|参照)|(?:コード|データ).*(参照でき|保持)/i.test(src)) {
-          emit("keep", "keep(raw:{code,data})");
-        }
-
-        if (/(技術的に正確|技術的な正確さ|正確性)/.test(src)) emit("technical", "style:=technical");
-        if (/(実行可能|実用的|具体的)/.test(src)) emit("actionable", "style+=actionable");
-
-        var coveredWords = /(Python|パイソン|コード|実装|調査|調べ|確認|解析|レビュー|パフォーマンス|性能|速度|問題|課題|ボトルネック|原因|修正|直し|改善|動作|挙動|仕様|変えず|変えない|維持|保持|ベンチマーク|benchmark|計測|数値|定量|簡潔|短く|要約|まとめ|元の|原文|raw|データ|参照|技術的|正確|実行可能|実用的|具体的)/gi;
-
-        var leftovers = splitSentences(src).filter(function (sentence) {
-          var reduced = sentence.replace(coveredWords, "").replace(/[、,・:：;；()\[\]{}「」『』\s]/g, "");
-          return reduced.length >= 8;
-        });
-
-        leftovers.slice(0, 4).forEach(function (sentence) {
-          emit("raw:" + sentence, 'raw("' + esc(sentence) + '")');
-        });
-
-        if (!out.length) return 'raw("' + esc(src) + '")';
-        return out.join("; ");
-      }
-
-      function fromMilc(value) {
-        var src = clean(value);
-        if (!src) return "";
-
-        var parts = [];
-
-        function add(text) {
-          if (parts.indexOf(text) === -1) parts.push(text);
-        }
-
-        if (/inspect\(py\.code\)/i.test(src)) add("Pythonコードを調査する。");
-        else if (/inspect\(code\)/i.test(src)) add("コードを調査する。");
-        else if (/inspect\(/i.test(src)) add("対象を調査する。");
-
-        if (/find\(perf\.issue\)/i.test(src)) add("性能上の問題を特定する。");
-        if (/find\(cause\)/i.test(src)) add("原因を特定する。");
-
-        if (/constraint:=behavior≡/i.test(src) && /(?:^|[;\s])fix(?:[;\s]|$|→)/i.test(src)) {
-          add("既存の動作を変えずに修正する。");
-        } else if (/(?:^|[;\s])fix(?:[;\s]|$|→)/i.test(src)) {
-          add("必要な修正を行う。");
-        } else if (/constraint:=behavior≡/i.test(src)) {
-          add("既存の動作を維持する。");
-        }
-
-        if (/fix→bench/i.test(src)) add("修正後にベンチマークを実行する。");
-        else if (/(?:^|[;\s])bench(?:[;\s]|$)/i.test(src)) add("ベンチマークを実行する。");
-
-        if (/metric:=quantify/i.test(src)) add("結果を数値で示す。");
-        if (/summary\{problem,cause,solution,bench\}→concise/i.test(src)) {
-          add("問題点、原因、改善策、ベンチマーク結果を簡潔にまとめる。");
-        } else if (/summary→concise/i.test(src)) {
-          add("結果を簡潔にまとめる。");
-        }
-
-        if (/keep\(raw:\{code,data\}\)/i.test(src)) add("元のコードとデータを参照できる状態で保持する。");
-        if (/style:=technical/i.test(src)) add("技術的な正確さを優先する。");
-        if (/style\+=actionable/i.test(src)) add("実行可能で具体的な内容にする。");
-
-        var rawRe = /raw\("((?:\\.|[^"\\])*)"\)/g;
-        var match;
-        while ((match = rawRe.exec(src)) !== null) {
-          try {
-            add(JSON.parse('"' + match[1] + '"'));
-          } catch (_) {
-            add(match[1]);
-          }
-        }
-
-        if (!parts.length) return src;
-        return parts.join("\n");
-      }
-
-      function convert() {
-        var value = input.value;
-        output.value = direction === "to" ? toMilc(value) : fromMilc(value);
-        inputCount.textContent = value.length + "文字";
-        outputCount.textContent = output.value.length + "文字";
-      }
-
-      function setDirection(next, keepText) {
-        if (next === direction) return;
-        direction = next;
-        toMilcBtn.setAttribute("aria-pressed", String(direction === "to"));
-        fromMilcBtn.setAttribute("aria-pressed", String(direction === "from"));
-        inputLabel.textContent = direction === "to" ? "自然文" : "MiL;C";
-        outputLabel.textContent = direction === "to" ? "MiL;C" : "自然文";
-        input.placeholder = direction === "to" ? "ここに文章を貼り付ける" : "ここにMiL;Cを貼り付ける";
-        if (!keepText) {
-          var previous = output.value;
-          input.value = previous;
-        }
-        convert();
-      }
-
-      function showToast(message) {
-        toast.textContent = message;
-        toast.classList.add("show");
-        window.clearTimeout(showToast.timer);
-        showToast.timer = window.setTimeout(function () {
-          toast.classList.remove("show");
-        }, 1400);
-      }
-
-      async function copyText(value, message) {
-        if (!value) return;
-        try {
-          await navigator.clipboard.writeText(value);
-          showToast(message);
-        } catch (_) {
-          output.focus();
-          output.select();
-          document.execCommand("copy");
-          showToast(message);
-        }
-      }
-
-      function encodeState() {
-        var state = { d: direction, t: input.value };
-        var bytes = new TextEncoder().encode(JSON.stringify(state));
-        var binary = "";
-        bytes.forEach(function (b) { binary += String.fromCharCode(b); });
-        return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
-      }
-
-      function decodeState(value) {
-        var base64 = value.replace(/-/g, "+").replace(/_/g, "/");
-        while (base64.length % 4) base64 += "=";
-        var binary = atob(base64);
-        var bytes = Uint8Array.from(binary, function (c) { return c.charCodeAt(0); });
-        return JSON.parse(new TextDecoder().decode(bytes));
-      }
-
-      function loadFromHash() {
-        if (!location.hash.startsWith("#s=")) return;
-        try {
-          var state = decodeState(location.hash.slice(3));
-          direction = state.d === "from" ? "from" : "to";
-          input.value = typeof state.t === "string" ? state.t : "";
-          toMilcBtn.setAttribute("aria-pressed", String(direction === "to"));
-          fromMilcBtn.setAttribute("aria-pressed", String(direction === "from"));
-          inputLabel.textContent = direction === "to" ? "自然文" : "MiL;C";
-          outputLabel.textContent = direction === "to" ? "MiL;C" : "自然文";
-          convert();
-        } catch (_) {}
-      }
-
-      input.addEventListener("input", function () {
-        window.clearTimeout(timer);
-        timer = window.setTimeout(convert, 120);
-      });
-
-      toMilcBtn.addEventListener("click", function () { setDirection("to", false); });
-      fromMilcBtn.addEventListener("click", function () { setDirection("from", false); });
-      copyBtn.addEventListener("click", function () { copyText(output.value, "結果をコピーしました"); });
-      shareBtn.addEventListener("click", function () {
-        var url = location.href.split("#")[0] + "#s=" + encodeState();
-        copyText(url, "共有リンクをコピーしました");
-      });
-      clearBtn.addEventListener("click", function () {
-        input.value = "";
-        output.value = "";
-        history.replaceState(null, "", location.href.split("#")[0]);
-        convert();
-        input.focus();
-      });
-
-      loadFromHash();
-      if (!input.value) {
-        input.value = "このPythonコードを調査してください。パフォーマンスの問題を特定し、動作を変えずに修正してください。修正後はベンチマークを実行し、改善の効果を数値で示してください。";
-        convert();
-      }
-    })();
-  </script>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script type="module" src="./src/app.js"></script>
 </body>
 </html>
