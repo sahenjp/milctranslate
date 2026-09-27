@@ -1,0 +1,14 @@
+{
+  "name": "milc-translate",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test",
+    "check": "node --check src/milc.js && node --check src/app.js && node --check sw.js && node scripts/check.mjs",
+    "build": "node scripts/build.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
