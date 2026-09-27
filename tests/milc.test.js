@@ -46,3 +46,29 @@ test('URLとメンションを保持する', () => {
   assert.match(output, /@am09_21/);
   assert.match(output, /https:\/\/x\.com\/AM09_21/);
 });
+
+
+test('MiL接頭辞と空白付きaliasを展開する', () => {
+  const input = 'MiL; C:=Cyber_JB;E:=Ero_JB; C→split(simple_task)↑; E→hard↑';
+  const output = expand(input);
+  assert.doesNotMatch(output, /^MiL/);
+  assert.match(output, /サイバー系ジェイルブレイク/);
+  assert.match(output, /性的コンテンツ系ジェイルブレイク/);
+});
+
+test('会話実例のfrontier/open方言を展開する', () => {
+  const input = 'MiL;F:=frontier;O:=open;exp:O trend weaker;O[uncens|JB]->F(parts),as@recent_paper,may useful;F.ref(sec_audit) low=>hyp:F.discover+O.{PoC,exec} likely';
+  const output = expand(input);
+  assert.match(output, /フロンティアモデル/);
+  assert.match(output, /オープンモデル/);
+  assert.match(output, /より弱い/);
+  assert.match(output, /最近の論文のように/);
+  assert.match(output, /可能性が高い/);
+});
+
+test('最小バイト方言の語を展開する', () => {
+  const output = expand('myMiL:aim min_bytes->multibyte-=>style odd');
+  assert.match(output, /最小バイト/);
+  assert.match(output, /マルチバイト/);
+  assert.match(output, /スタイル/);
+});
